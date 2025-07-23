@@ -2,9 +2,10 @@ package com.falae.realtimechat;
 
 import com.google.gson.Gson;
 import jakarta.websocket.DecodeException;
+import jakarta.websocket.Decoder;
 import jakarta.websocket.EndpointConfig;
 
-public class MessageDecoder {
+public class MessageDecoder implements Decoder.Text<MessageModel> {
     private static final Gson gson = new Gson();
 
     @Override
@@ -13,9 +14,14 @@ public class MessageDecoder {
     }
 
     @Override
+    public boolean willDecode(String s) {
+        return false;
+    }
+
     public boolean checkerMessage (String json){
         return (json != null && json.length() > 0);
     }
+
     @Override
     public void init(EndpointConfig config){}
 

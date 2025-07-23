@@ -7,10 +7,10 @@ import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
 
 public class MessageEncoder implements Encoder.Text<MessageModel>   {
-    private static final Gson gson = new GsonBuilder();
+    private static final Gson gson = new GsonBuilder().create();
 
     @Override
-    public String encodeMessage(MessageModel message)throws EncodeException {
+    public String encode(MessageModel message)throws EncodeException {
         return gson.toJson(message);
     }
     @Override
