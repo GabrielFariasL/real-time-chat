@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat Público</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        #chat {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .message { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<h2>Chat Público</h2>
+
+<div id="chat"></div>
+
+<div id="username-form">
+    <input type="text" id="username" placeholder="Digite seu nome" />
+    <button onclick="saveUsername()">Entrar</button>
+</div>
+
+<div id="message-form" style="display: none;">
+    <input type="text" id="message" placeholder="Digite sua mensagem" />
+    <button onclick="sendMessage()">Enviar</button>
+</div>
+
+<script>
+    let stompClient = null;
+    let username = null;
+
+    function connect() {
+        const socket = new SockJS("/chat");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function () {
+            console.log("Conectado ao WebSocket");
+
+            stompClient.subscribe("/topics/livechat", function (msg) {
+                const data = JSON.parse(msg.body);
+                const chat = document.getElementById("chat");
+                const el = document.createElement("div");
+                el.className = "message";
+                el.textContent = `${data.username}: ${data.content}`;
+                chat.appendChild(el);
+            });
+        });
+    }
+
+    function saveUsername() {
+        const input = document.getElementById("username").value;
+        if (!input) return;
+
+        username = input;
+        localStorage.setItem("chat_username", username);
+
+        document.getElementById("username-form").style.display = "none";
+        document.getElementById("message-form").style.display = "block";
+    }
+
+    function sendMessage() {
+        const content = document.getElementById("message").value;
+        if (!content || !username) return;
+
+        stompClient.send("/application/new-message", {}, JSON.stringify({
+            username: username,
+            content: content
+        }));
+
+        document.getElementById("message").value = "";
+    }
+
+    // Recupera o nome da sessão anterior (se houver)
+    window.onload = function () {
+        const savedName = localStorage.getItem("chat_username");
+        if (savedName) {
+            username = savedName;
+            document.getElementById("username-form").style.display = "none";
+            document.getElementById("message-form").style.display = "block";
+        }
+
+        connect();
+    };
+</script>
+</body>
+</html>

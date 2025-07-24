@@ -1,4 +1,4 @@
-package com.falae.realtimechat;
+package br.com.falae.realtimechat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
